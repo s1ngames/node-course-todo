@@ -1,9 +1,10 @@
-var express = require('express');
-var bodyParser = require('body-parser'); //json to object
+const express = require('express');
+const bodyParser = require('body-parser'); //json to object
 const {ObjectID} = require('mongodb');
-var {mongoose} = require('./db/mongoose');
-var {Todo} = require('./models/todo');
-var {User} = require('./models/user');
+const {mongoose} = require('./db/mongoose');
+const {Todo} = require('./models/todo');
+const {User} = require('./models/user');
+const _ = require('lodash');
 
 var app = express();
 const port = process.env.PORT || 3000;
@@ -77,6 +78,46 @@ res.send({todo});
 //if yes send back
 //error - 400 empty body
 });
+
+
+
+
+
+
+
+//updating status
+//app.patch to update a resourse (not on stone , just guidlines for seder)
+app.patch('/todos/:id',(req,res)=>{
+  var id = req.params.id;
+  var body = _.pick(req.body,['text','completed']) //user cant update other things inside todos //extract body to array (take the writen vars if they exist)       //reason for lodash
+  if(!ObjectID.isValid(id)){
+    return res.status(404).send();
+  }
+
+  if(_.isBoolean(body.completed) && body.completed){
+    body.completedAt = new Date().getTime(); //return time stamp
+  }else{
+body.completed = false;
+body.completedAt = null; //remove from db - set to null
+  }
+
+  Todo.findByIdAndUpdate(id,{
+    $set: body
+  },{
+    new: true //return the new todo
+  }).then((todo)=>{
+if(!todo){
+  return res.status(404).send();
+}
+res.send({todo});
+
+  }).catch((e)=>{
+res.status(400).send();
+  });
+
+
+});
+
 
 
 app.listen(port,()=>{
