@@ -6,6 +6,7 @@ const {Todo} = require('./models/todo');
 const {User} = require('./models/user');
 var {authenticate} = require('./middleware/authenticate');
 const _ = require('lodash');
+const bcrypt = require('bcryptjs');
 
 var app = express();
 const port = process.env.PORT || 3000;
@@ -170,6 +171,18 @@ app.get('/users/me',authenticate, (req,res)=>{
 // });
 });
 
+//login
+app.post('/users/login',(req,res)=>{
+var body = _.pick(req.body, ['email', 'password']);
+User.findByCredentials(body.email,body.password).then((user)=>{
+return user.generateAuthToken().then((token)=>{
+  res.header('x-auth',token).send(user);
+});
+}).catch((e)=>{
+res.status(400).send();
+});
+
+});
 
 
 
@@ -195,8 +208,18 @@ app.listen(port,()=>{
 
 
 
-
-
+//
+// User.findOne({
+//   'email': body.email
+// },(err,doc)=>{
+//   bcrypt.compare(body.password,doc.password,(err,result)=>{
+//   if(result){
+//     res.send(doc);
+//   }else{
+//     res.status(401).send();
+//   }
+//   });
+// });
 
 
 
