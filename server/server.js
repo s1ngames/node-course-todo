@@ -121,7 +121,9 @@ res.status(400).send();
 
 
 
-//users
+//users  + authenticate***************************
+
+
 // app.post('/users',(req,res)=>{
 //
 // var body =_.pick(req.body,['email','password']);  //one is pick from the request , and update only the written vars in array, so users cant change all the vars inside the model//takes out only the selected paremeters ,
